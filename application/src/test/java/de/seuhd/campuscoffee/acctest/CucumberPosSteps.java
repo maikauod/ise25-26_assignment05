@@ -92,6 +92,13 @@ public class CucumberPosSteps {
     }
 
     // TODO: Add Given step for new scenario
+    //first step creating the POS entry same as first scenario
+    @Given("another empty POS list")
+    public void anotherEmptyPOSList(){
+        List<PosDto> retrievedPosList = retrievePos();
+        assertThat(retrievedPosList).isEmpty();
+    }
+
 
     // When -----------------------------------------------------------------------
 
@@ -102,7 +109,33 @@ public class CucumberPosSteps {
     }
 
     // TODO: Add When step for new scenario
+    //first step creating the POS entry same as first scenario
+    @When("the following POS are given")
+    public void theFollowingPOSAreGiven(List<PosDto> posList) {
+        createdPosList = createPos(posList);
+        assertThat(createdPosList).size().isEqualTo(posList.size());
 
+    }
+
+    //2nd step: the actual implementation of changing the description
+    @When("the POS named {string} description is updated to {string}")
+    public void updateDescriptionOfPOS(String selectedName, String newDescription){
+        PosDto selectedPos = retrievePosByName(selectedName);
+        updatedPos= PosDto.builder()
+                .id(selectedPos.id())
+                .name(selectedPos.name())
+                .description(newDescription)
+                .type(selectedPos.type())
+                .campus(selectedPos.campus())
+                .street(selectedPos.street())
+                .houseNumber(selectedPos.houseNumber())
+                .postalCode(selectedPos.postalCode())
+                .city(selectedPos.city())
+                .build();
+        List<PosDto> posnew= updatePos(List.of(updatedPos));
+        updatedPos = posnew.get(0);
+
+    }
     // Then -----------------------------------------------------------------------
 
     @Then("the POS list should contain the same elements in the same order")
@@ -114,4 +147,18 @@ public class CucumberPosSteps {
     }
 
     // TODO: Add Then step for new scenario
+    //first step creating the POS entry same as first scenario
+    @Then("the elements should be added to the POS list in order")
+        public void theElementsShouldBeAddedToThePOSList() {
+        List<PosDto> retrievedPosList = retrievePos();
+        assertThat(retrievedPosList)
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id", "createdAt", "updatedAt")
+                .containsExactlyInAnyOrderElementsOf(createdPosList);
+    }
+
+    @Then("the POS named {string} description should be {string}")
+    public void ThePosDescriptionShouldBe(String selectedName, String updatedDescription) {
+        PosDto selectedPos = retrievePosByName(selectedName);
+        assertThat(selectedPos.description()).isEqualTo(updatedDescription);
+    }
 }
